@@ -23,18 +23,17 @@ import (
 )
 
 type Tag struct {
-	Id 	    int    `json:"id"`
-	Name    string `json:"name"`
-	Status  string `json:"status"`
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
 }
 
 type Tags struct {
-	Count 	  int    `json:"count"`
-	Next      int    `json:"next"`
-	Previous  string `json:"previous"`
-	Results   []Tag  `json:"results"`
+	Count    int    `json:"count"`
+	Next     int    `json:"next"`
+	Previous string `json:"previous"`
+	Results  []Tag  `json:"results"`
 }
-
 
 func main() {
 	f, err := os.OpenFile(fmt.Sprintf("./logs/%s.log", time.Now().Format("2006-01-02T15-04-05-0700")), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
@@ -44,7 +43,7 @@ func main() {
 	log.SetOutput(f)
 
 	log.Info("Server start...")
-	
+
 	engine := html.New("./public", ".html")
 
 	app := fiber.New(fiber.Config{
@@ -60,11 +59,11 @@ func main() {
 		result := getResponse()
 		tags := parseResponse(result)
 
-		if(lastCount != tags.Count){
+		if lastCount != tags.Count {
 			lastCount = tags.Count
 			log.Info("New version detected")
 			update()
-			log.Infof("New version pulled : %s",tags.Results[1].Name)
+			log.Infof("New version pulled : %s", tags.Results[1].Name)
 		}
 	})
 	c.Start()
@@ -109,7 +108,7 @@ func parseResponse(body string) Tags {
 	return result
 }
 
-func update(){
+func update() {
 
 	err := godotenv.Load()
 	if err != nil {
@@ -130,7 +129,7 @@ func update(){
 		log.Info("Stoped successfully!")
 	}
 
-	cmd = exec.Command("docker","rm","-f",name)
+	cmd = exec.Command("docker", "rm", "-f", name)
 	log.Info("Deleting old container...")
 	err = cmd.Run()
 	if err != nil {
@@ -139,7 +138,7 @@ func update(){
 		log.Info("Deleted successfully!")
 	}
 
-	cmd = exec.Command("docker","rmi","-f",image)
+	cmd = exec.Command("docker", "rmi", "-f", image)
 	log.Info("Deleting old image...")
 	err = cmd.Run()
 	if err != nil {
@@ -148,7 +147,7 @@ func update(){
 		log.Info("Deleted successfully!")
 	}
 
-	imageVersion := fmt.Sprintf("%s:latest",image)
+	imageVersion := fmt.Sprintf("%s:latest", image)
 	cmd = exec.Command("docker", "pull", imageVersion)
 	log.Info("Checking for updates...")
 	err = cmd.Run()
@@ -157,8 +156,8 @@ func update(){
 	} else {
 		log.Info("Updated successfully!")
 	}
-	go func(name string, image string){
-		cmd = exec.Command("docker","run","-p","80:80","--name",name,image)
+	go func(name string, image string) {
+		cmd = exec.Command("docker", "run", "-p", "80:80", "--name", name, image)
 		log.Info("New image running...")
 		err = cmd.Run()
 	}(name, image)
